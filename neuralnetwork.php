@@ -34,7 +34,7 @@
 			return rand(1,99) / 100;
 		}
 
-	  private function sigmoid($f){
+		private function sigmoid($f){
 			return 1 / (1 + pow(M_E,-$f));
 		}
 
@@ -108,7 +108,7 @@
 					$this->total_loops++;
 				}while($errSum > $errMin && $this->total_loops < $max_loops);
 			}catch(Exception $e){
-			  echo "Error: " . $e->getMessage();
+				echo "Error: " . $e->getMessage();
 			}
 
 		}
