@@ -66,13 +66,17 @@
 			return $this->learning_rate * pow($target - $o,2);
 		}
 
-		public function learn($targets,$inputs,$errMin = 0.01,$max_loops = 10000,$learning_rate = 0.1){
+		public function learn($targets,$inputs,$params = []){
+			$err_min = isset($params["err_min"]) ? $params["err_min"] : 0.002;
+			$max_loops = isset($params["max_loops"]) ? $params["max_loops"] : 100000;
+			$learning_rate = isset($params["learning_rate"]) ? $params["learning_rate"] : 0.5;
+			if(isset($params["err_min"])) $err_min = $params["err_min"];
 			try{
 				if(!is_array($targets)) throw new Exception('$targets must be an array');
 				foreach($targets as $target){
 					if(is_array($target)) throw new Exception('$targets must have exactly one column');
 					if(!is_numeric($target)) throw new Exception('$targets non-numeric value detected');
-					if($target < 0 || $target > 1) throw new Exception('$targets values must be between 0 and 1' . PHP_EOL);
+					if($target < 0 || $target > 1) throw new Exception('$targets values must be between 0 and 1');
 				}
 				if(count($targets) != count($inputs)) throw new Exception('$targets must contain the same number of rows as $inputs');
 
@@ -84,7 +88,8 @@
 						if(!is_numeric($i)) throw new Exception('$inputs non-numeric value detected');
 					}
 				}
-				if($errMin <= 0) throw new Exception('$errMin must be greater than zero');
+				if($err_min <= 0) throw new Exception('$err_min must be greater than zero');
+				if($max_loops <= 0) throw new Exception('$max_loops must be greater than zero');
 				if($learning_rate <= 0) throw new Exception('$learning_rate must be greater than zero');
 
 				$this->learning_rate = $learning_rate;
@@ -106,11 +111,10 @@
 						$this->backward($o,$target,$h,$input);
 					}
 					$this->total_loops++;
-				}while($errSum > $errMin && $this->total_loops < $max_loops);
+				}while($errSum > $err_min && $this->total_loops < $max_loops);
 			}catch(Exception $e){
-				echo "Error: " . $e->getMessage();
+				echo "Error: " . $e->getMessage() . PHP_EOL;
 			}
-
 		}
 
 		public function predict($input){
@@ -125,7 +129,7 @@
 				//return $this->forward($h,1,0) >= $this->threshold ? 1 : 0;
 				return $this->forward($h,1,0);
 			}catch(Exception $e){
-				echo "Error: " . $e->getMessage();
+				echo "Error: " . $e->getMessage() . PHP_EOL;
 			}
 		}
 
