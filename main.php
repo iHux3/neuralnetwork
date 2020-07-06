@@ -13,6 +13,6 @@
   $targets = [0,1,1,0];
 
   $nn->learn($targets,$inputs);
-  echo "total loops: " . $nn->total_loops . PHP_EOL;
+  //echo "total loops: " . $nn->total_loops . PHP_EOL;
   echo "result: " . $nn->predict([1,1],1) . PHP_EOL;
 ?>
