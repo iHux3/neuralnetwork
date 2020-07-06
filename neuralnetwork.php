@@ -66,31 +66,43 @@
 			return $this->learning_rate * pow($target - $o,2);
 		}
 
+		private function calc_threshold($targets,$inputs){
+			$t0 = [];
+			$t1 = [];
+			for($i = 0; $i < count($targets); $i++){
+				$p = $this->predict($inputs[$i]);
+				if($targets[$i] == 0) $t0[] = $p; else $t1[] = $p;
+			}
+			$max = max($t0);
+			$min = min($t1);
+			$this->threshold = $min > $max ? ($min - $max) / 2 : ($max - $min) / 2;
+		}
+
 		public function learn($targets,$inputs,$params = []){
 			$err_min = isset($params["err_min"]) ? $params["err_min"] : 0.002;
 			$max_loops = isset($params["max_loops"]) ? $params["max_loops"] : 100000;
 			$learning_rate = isset($params["learning_rate"]) ? $params["learning_rate"] : 0.5;
 			if(isset($params["err_min"])) $err_min = $params["err_min"];
 			try{
-				if(!is_array($targets)) throw new Exception('$targets must be an array');
+				if(!is_array($targets)) throw new Exception("@p0 must be an array");
 				foreach($targets as $target){
-					if(is_array($target)) throw new Exception('$targets must have exactly one column');
-					if(!is_numeric($target)) throw new Exception('$targets non-numeric value detected');
-					if($target < 0 || $target > 1) throw new Exception('$targets values must be between 0 and 1');
+					if(is_array($target)) throw new Exception("@p0 must have exactly one column");
+					if(!is_numeric($target)) throw new Exception("@p0 non-numeric value detected");
+					if($target < 0 || $target > 1) throw new Exception("@p0 values must be between 0 and 1");
 				}
-				if(count($targets) != count($inputs)) throw new Exception('$targets must contain the same number of rows as $inputs');
+				if(count($targets) != count($inputs)) throw new Exception("@p0 must contain the same number of rows as @p1");
 
-				if(!is_array($inputs)) throw new Exception('$inputs must be an array');
+				if(!is_array($inputs)) throw new Exception("@p1 must be an array");
 				foreach($inputs as $input){
-					if(!is_array($input)) throw new Exception('$inputs must be a 2d array');
-					if(count($input) != $this->il) throw new Exception('$inputs must contain ' . $this->il . ' columns');
+					if(!is_array($input)) throw new Exception("@p1 must be a 2d array");
+					if(count($input) != $this->il) throw new Exception("@p1 must contain $this->il columns");
 					foreach($input as $i){
-						if(!is_numeric($i)) throw new Exception('$inputs non-numeric value detected');
+						if(!is_numeric($i)) throw new Exception("@p1 non-numeric value detected");
 					}
 				}
-				if($err_min <= 0) throw new Exception('$err_min must be greater than zero');
-				if($max_loops <= 0) throw new Exception('$max_loops must be greater than zero');
-				if($learning_rate <= 0) throw new Exception('$learning_rate must be greater than zero');
+				if($err_min <= 0) throw new Exception("@p2['err_min'] must be greater than zero");
+				if($max_loops <= 0) throw new Exception("@p2['max_loops'] must be greater than zero");
+				if($learning_rate <= 0) throw new Exception("@p2['learning_rate'] must be greater than zero");
 
 				$this->learning_rate = $learning_rate;
 				$this->targets = $targets;
@@ -112,22 +124,28 @@
 					}
 					$this->total_loops++;
 				}while($errSum > $err_min && $this->total_loops < $max_loops);
+				$this->calc_threshold($targets,$inputs);
+
 			}catch(Exception $e){
 				echo "Error: " . $e->getMessage() . PHP_EOL;
 			}
 		}
 
-		public function predict($input){
+		public function predict($input,$type = 0){
 			try{
-				if(!is_array($input)) throw new Exception('$input must be an array');
-				if(count($input) != $this->il) throw new Exception('$input must contain ' . $this->il . ' values');
+				if(!is_array($input)) throw new Exception("@p0 must be an array");
+				if(count($input) != $this->il) throw new Exception("@p0 must contain $this->il values");
 				foreach($input as $i){
-					if(!is_numeric($i)) throw new Exception('$input non-numeric value detected');
+					if(!is_numeric($i)) throw new Exception("@p0 non-numeric value detected");
 				}
 				$h = [];
 				for($i = 0; $i < count($this->hidden_layer); $i++) $h[$i] = $this->forward($input,0,$i);
-				//return $this->forward($h,1,0) >= $this->threshold ? 1 : 0;
-				return $this->forward($h,1,0);
+				$result = $this->forward($h,1,0);
+				if($type == 0){
+					return $result;
+				}else{
+					return $result >= $this->threshold ? 1 : 0;
+				}
 			}catch(Exception $e){
 				echo "Error: " . $e->getMessage() . PHP_EOL;
 			}
@@ -136,12 +154,5 @@
 		public function get_weights(){
 			return ["hidden_layer" => $this->hidden_layer, "output_layer" => $this->output_layer];
 		}
-
-		/*public function set_threshold($threshold = 0.5){
-			if(!is_numeric($threshold)) $threshold = 0.5;
-			if($threshold <= 0) $threshold = 0.01;
-			if($threshold >= 1) $threshold = 0.99;
-			$this->threshold = $threshold;
-		}*/
 	}
 ?>
