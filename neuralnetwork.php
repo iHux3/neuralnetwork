@@ -80,7 +80,7 @@
 
 		public function learn($targets,$inputs,$params = []){
 			$err_min = isset($params["err_min"]) ? $params["err_min"] : 0.002;
-			$max_loops = isset($params["max_loops"]) ? $params["max_loops"] : 100000;
+			$max_loops = isset($params["max_loops"]) ? $params["max_loops"] : 10000;
 			$learning_rate = isset($params["learning_rate"]) ? $params["learning_rate"] : 0.5;
 			if(isset($params["err_min"])) $err_min = $params["err_min"];
 			try{
