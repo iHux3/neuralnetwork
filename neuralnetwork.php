@@ -126,7 +126,7 @@
 				if($type == 0){
 					if(count($d["weights"]) != $this->il) throw new Exception("@p0 weights must contain ". $this->il  . " numbers");
 				}else{
-					if(count($d["weights"]) != $this->il) throw new Exception("@p0 weights must contain ". $this->hl  . " numbers");
+					if(count($d["weights"]) != $this->hl) throw new Exception("@p0 weights must contain ". $this->hl  . " numbers");
 				}
 
 				foreach($d["weights"] as $i){
@@ -187,10 +187,11 @@
 			}
 		}
 
-		public function modify_layer($data,$type = 0){
+		public function modify_layer($data,$targets,$inputs,$type = 0){
 			try{
 				$this->check_modify_layer($data,$type);
 				if($type == 0)	$this->hidden_layer = $data; else $this->output_layer = $data;
+				$this->calc_threshold($targets,$inputs);
 			}catch(Exception $e){
 				echo "modify_layer<" . $e->getMessage() . ">". PHP_EOL;
 			}
