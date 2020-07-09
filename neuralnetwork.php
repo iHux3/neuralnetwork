@@ -10,11 +10,11 @@
 		private $threshold;
 		public $total_loops = 0;
 
-		public function __construct($input_layers = 2,$hidden_layers = 2){
-			if($input_layers < 1) $input_layers = 1;
-			if($hidden_layers < 1) $hidden_layers = 1;
-			$this->il = round($input_layers);
-			$this->hl = round($hidden_layers);
+		public function __construct($input_neurons = 2,$hidden_neurons = 2){
+			if($input_neurons < 1) $input_neurons = 1;
+			if($hidden_neurons < 1) $hidden_neurons = 1;
+			$this->il = round($input_neurons);
+			$this->hl = round($hidden_neurons);
 
 			$output_weights = [];
 			for($i = 0; $i < $this->hl; $i++){
@@ -140,7 +140,7 @@
 		public function learn($targets,$inputs,$params = []){
 			try{
 				$err_min = isset($params["err_min"]) ? $params["err_min"] : 0.001;
-				$max_loops = isset($params["max_loops"]) ? $params["max_loops"] : 10000;
+				$max_loops = isset($params["max_loops"]) ? $params["max_loops"] : 50000;
 				$learning_rate = isset($params["learning_rate"]) ? $params["learning_rate"] : 0.5;
 
 				$this->check_learn($targets,$inputs,["err_min" => $err_min, "max_loops" => $max_loops, "learning_rate" => $learning_rate]);
