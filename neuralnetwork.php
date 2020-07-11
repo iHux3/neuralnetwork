@@ -17,21 +17,26 @@
 			$this->hl = round($hidden_neurons);
 
 			$output_weights = [];
+			$we = 0.1;
 			for($i = 0; $i < $this->hl; $i++){
 				$hidden_weights = [];
 				for($j = 0; $j < $this->il; $j++){
-					$hidden_weights[$j] = $this->random_weight();
+					$hidden_weights[$j] = $we;
+					$we += 0.01;
 				}
-				$this->hidden_layer[$i] = ["weights" => $hidden_weights, "bias" => $this->random_weight()];
-				$output_weights[$i] = $this->random_weight();
+				$this->hidden_layer[$i] = ["weights" => $hidden_weights, "bias" => 0.5];
+				$output_weights[$i] = $we;
+				$we += 0.01;
 			}
 			$this->output_layer = [
-				["weights" => $output_weights, "bias" => $this->random_weight()]
+				["weights" => $output_weights, "bias" => 0.5]
 			];
+			print_r($this->hidden_layer);
+			print_r($this->output_layer);
 		}
 
 		private function random_weight(){
-			return rand(1,99) / 100;
+			return rand(0,99) / 100;
 		}
 
 		private function sigmoid($f){
@@ -140,7 +145,7 @@
 		public function learn($targets,$inputs,$params = []){
 			try{
 				$err_min = isset($params["err_min"]) ? $params["err_min"] : 0.001;
-				$max_loops = isset($params["max_loops"]) ? $params["max_loops"] : 50000;
+				$max_loops = isset($params["max_loops"]) ? $params["max_loops"] : 10000;
 				$learning_rate = isset($params["learning_rate"]) ? $params["learning_rate"] : 0.5;
 
 				$this->check_learn($targets,$inputs,["err_min" => $err_min, "max_loops" => $max_loops, "learning_rate" => $learning_rate]);
