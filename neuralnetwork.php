@@ -28,8 +28,6 @@
 			$this->output_layer = [
 				["weights" => $output_weights, "bias" => $this->random_weight()]
 			];
-			print_r($this->hidden_layer);
-			print_r($this->output_layer);
 		}
 
 		private function random_weight(){
