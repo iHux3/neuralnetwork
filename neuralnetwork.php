@@ -17,19 +17,16 @@
 			$this->hl = round($hidden_neurons);
 
 			$output_weights = [];
-			$we = 0.1;
 			for($i = 0; $i < $this->hl; $i++){
 				$hidden_weights = [];
 				for($j = 0; $j < $this->il; $j++){
-					$hidden_weights[$j] = $we;
-					$we += 0.01;
+					$hidden_weights[$j] = $this->random_weight();
 				}
-				$this->hidden_layer[$i] = ["weights" => $hidden_weights, "bias" => 0.5];
-				$output_weights[$i] = $we;
-				$we += 0.01;
+				$this->hidden_layer[$i] = ["weights" => $hidden_weights, "bias" => $this->random_weight()];
+				$output_weights[$i] = $this->random_weight();
 			}
 			$this->output_layer = [
-				["weights" => $output_weights, "bias" => 0.5]
+				["weights" => $output_weights, "bias" => $this->random_weight()]
 			];
 			print_r($this->hidden_layer);
 			print_r($this->output_layer);
