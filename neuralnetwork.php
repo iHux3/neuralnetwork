@@ -1,4 +1,5 @@
 <?php
+
 	class NeuralNetwork{
 		private $hidden_layer;
 		private $output_layer;
@@ -10,7 +11,7 @@
 		private $threshold;
 		public $total_loops = 0;
 
-		public function __construct($input_neurons = 2,$hidden_neurons = 2){
+		public function __construct(int $input_neurons = 2,int $hidden_neurons = 2){
 			if($input_neurons < 1) $input_neurons = 1;
 			if($hidden_neurons < 1) $hidden_neurons = 1;
 			$this->il = round($input_neurons);
@@ -30,15 +31,15 @@
 			];
 		}
 
-		private function random_weight(){
+		private function random_weight() : float{
 			return rand(0,99) / 100;
 		}
 
-		private function sigmoid($f){
+		private function sigmoid(float $f) : float{
 			return 1 / (1 + pow(M_E,-$f));
 		}
 
-		private function forward($input,$type,$id){
+		private function forward(array $input,int $type,int $id) : float{
 			$layer = $type == 0 ? $this->hidden_layer : $this->output_layer;
 			$result = 0;
 			for($i = 0; $i < count($input); $i++){
@@ -49,7 +50,7 @@
 			return self::sigmoid($result);
 		}
 
-		private function backward($o,$target,$h,$input){
+		private function backward(float $o, float $target, array $h, array $input) : void{
 			$pre = ($o - $target) * ($o * (1 - $o));
 
 			for($i = 0; $i < count($this->output_layer[0]["weights"]); $i++){
@@ -62,11 +63,11 @@
 			}
 		}
 
-		private function error($target,$o){
+		private function error(float $target, float $o) : float{
 			return $this->learning_rate * pow($target - $o,2);
 		}
 
-		private function calc_threshold($targets,$inputs){
+		private function calc_threshold(array $targets,array $inputs) : void{
 			$t0 = [];
 			$t1 = [];
 			for($i = 0; $i < count($targets); $i++){
@@ -78,8 +79,7 @@
 			$this->threshold = $min > $max ? ($min - $max) / 2 : ($max - $min) / 2;
 		}
 
-		private function check_learn($targets,$inputs,$params){
-			if(!is_array($targets)) throw new Exception("@p0 must be an array");
+		private function check_learn(array $targets,array $inputs, array $params) : void{
 			$zero = false;
 			$one = false;
 			foreach($targets as $target){
@@ -91,7 +91,6 @@
 			if($zero != true || $one != true) throw new Exception("@p0 must include at least 1 zero and 1 one");
 			if(count($targets) != count($inputs)) throw new Exception("@p0 must contain the same number of rows as @p1");
 
-			if(!is_array($inputs)) throw new Exception("@p1 must be an array");
 			foreach($inputs as $input){
 				if(!is_array($input)) throw new Exception("@p1 must be a 2d array");
 				if(count($input) != $this->il) throw new Exception("@p1 must contain $this->il columns");
@@ -104,16 +103,14 @@
 			if($params["learning_rate"] <= 0) throw new Exception("@p2['learning_rate'] must be greater than zero");
 		}
 
-		private function check_predict($input){
-			if(!is_array($input)) throw new Exception("@p0 must be an array");
+		private function check_predict(array $input){
 			if(count($input) != $this->il) throw new Exception("@p0 must contain $this->il numbers");
 			foreach($input as $i){
 				if(!is_numeric($i)) throw new Exception("@p0 non-numeric value detected");
 			}
 		}
 
-		private function check_modify_layer($data,$type){
-			if(!is_array($data)) throw new Exception("@p0 must be an array");
+		private function check_modify_layer(array $data,int $type) : void{
 			if($type == 0){
 				if(count($data) != $this->hl) throw new Exception("@p0 must contain $this->hl rows");
 			}else{
@@ -137,11 +134,11 @@
 			}
 		}
 
-		public function learn($targets,$inputs,$params = []){
+		public function learn(array $targets,array $inputs,array $params = []) : void{
 			try{
-				$err_min = isset($params["err_min"]) ? $params["err_min"] : 0.001;
-				$max_loops = isset($params["max_loops"]) ? $params["max_loops"] : 10000;
-				$learning_rate = isset($params["learning_rate"]) ? $params["learning_rate"] : 0.5;
+				$err_min = $params["err_min"] ?? 0.001;
+				$max_loops = $params["max_loops"] ?? 10000;
+				$learning_rate = $params["learning_rate"] ?? 0.5;
 
 				$this->check_learn($targets,$inputs,["err_min" => $err_min, "max_loops" => $max_loops, "learning_rate" => $learning_rate]);
 				$this->learning_rate = $learning_rate;
@@ -171,7 +168,7 @@
 			}
 		}
 
-		public function predict($input,$type = 0){
+		public function predict(array $input,int $type = 0) : float{
 			try{
 				$this->check_predict($input);
 				$h = [];
@@ -187,7 +184,7 @@
 			}
 		}
 
-		public function modify_layer($data,$targets,$inputs,$type = 0){
+		public function modify_layer(array $data,array $targets,array $inputs,int $type = 0) : void{
 			try{
 				$this->check_modify_layer($data,$type);
 				if($type == 0)	$this->hidden_layer = $data; else $this->output_layer = $data;
@@ -197,11 +194,18 @@
 			}
 		}
 
-		public function get_structure(){
-			return ["hidden_layer" => $this->hidden_layer, "output_layer" => $this->output_layer];
+		public function get_structure() : string{
+			$return = "\n";
+			for($i = 0; $i < $this->hl; $i++){
+				$return .= implode(",",$this->hidden_layer[$i]["weights"]) . "," . $this->hidden_layer[$i]["bias"];
+				$return .= "\n";
+			}
+			$return .= "\n";
+			$return .= implode(",",$this->output_layer[0]["weights"]) . "," . $this->output_layer[0]["bias"];
+			return $return;
 		}
 
-		public function get_threshold(){
+		public function get_threshold() : float{
 			return $this->threshold;
 		}
 	}
